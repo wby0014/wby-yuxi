@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yuxi 实例设置</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; color: #222; }
+    h1 { font-size: 18px; }
+    form { display: flex; gap: 8px; margin: 16px 0; }
+    input { flex: 1; padding: 6px 8px; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    li span { flex: 1; }
+    .err { color: #c00; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Yuxi 实例</h1>
+    <form id="add-form">
+      <input id="name" placeholder="名称（如：生产环境）" />
+      <input id="url" placeholder="地址（如 yuxi.example.com）" />
+      <button type="submit">添加</button>
+    </form>
+    <ul id="list"></ul>
+    <p id="error" class="err"></p>
+  </main>
+  <script src="./settings.js"></script>
+</body>
+</html>
