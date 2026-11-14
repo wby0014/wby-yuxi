@@ -105,6 +105,7 @@ async function switchInstance(id) {
   persist();
   if (mainWindow && !mainWindow.isDestroyed()) {
     await mainWindow.webContents.session.clearStorageData({ storages: ['localstorage'] });
+    mainWindow.webContents.send('instances:changed', repo.current());
     mainWindow.webContents.reload();
   }
   rebuildMenu();
