@@ -40,7 +40,7 @@
   "scripts": {
     "build:renderer": "bash scripts/build-renderer.sh",
     "start": "npm run build:renderer && electron .",
-    "test": "node --test test/",
+    "test": "node --test",
     "dist": "npm run build:renderer && electron-builder"
   }
 }
