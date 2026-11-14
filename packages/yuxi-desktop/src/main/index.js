@@ -11,6 +11,7 @@ const { loadInstancesFile, saveInstancesFile } = require('./instances-store');
 const { routeRequest } = require('./protocol');
 const { openSettingsWindow } = require('./settings-window');
 const { buildMenu } = require('./menu');
+const { forwardHeaders } = require('./headers');
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -34,10 +35,16 @@ const MIME = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.avif': 'image/avif',
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
+  '.wasm': 'application/wasm',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.map': 'application/json',
 };
 
@@ -52,16 +59,6 @@ function persist() {
 function currentInstanceUrl() {
   const cur = repo.current();
   return cur ? cur.url : 'http://127.0.0.1:1'; // 无实例时的占位，转发必然失败并返回 502
-}
-
-/** 去掉 net.fetch 会自行设置的传输层头，避免转发冲突。 */
-function forwardHeaders(headers) {
-  const out = {};
-  for (const [k, v] of Object.entries(headers || {})) {
-    if (k === 'host' || k === 'content-length' || k === 'connection') continue;
-    out[k] = v;
-  }
-  return out;
 }
 
 function registerProtocol() {
@@ -118,16 +115,21 @@ function registerIpc() {
   ipcMain.handle('instances:add', (_e, { name, url }) => {
     const r = validateInstance({ name, url });
     if (r.error) return { error: r.error };
+    const wasEmpty = repo.current() === null;
     repo.add(r.instance);
     persist();
     rebuildMenu();
+    // 首次添加实例：主窗口此前停在「无实例」的失败态，需 reload 重新加载 Vue。
+    if (wasEmpty && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.reload();
+    }
     return { instance: r.instance };
   });
   ipcMain.handle('instances:remove', (_e, id) => {
-    repo.remove(id);
+    const removed = repo.remove(id);
     persist();
     rebuildMenu();
-    return { ok: true };
+    return { ok: removed };
   });
   ipcMain.handle('instances:switch', (_e, id) => switchInstance(id));
   ipcMain.handle('app:open-settings', () => { openSettingsWindow(); return { ok: true }; });
