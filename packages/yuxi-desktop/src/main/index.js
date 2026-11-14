@@ -157,7 +157,7 @@ async function createMainWindow() {
     },
   });
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  await mainWindow.loadURL('app://yuxi/index.html');
+  await mainWindow.loadURL('app://yuxi/');
 }
 
 app.whenReady().then(() => {
