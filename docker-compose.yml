@@ -111,6 +111,8 @@ services:
         condition: service_healthy
       sandbox-provisioner:
         condition: service_healthy
+      milvus:
+        condition: service_healthy
       storage-migrator:
         condition: service_completed_successfully
 
@@ -177,6 +179,8 @@ services:
       minio:
         condition: service_healthy
       sandbox-provisioner:
+        condition: service_healthy
+      milvus:
         condition: service_healthy
       storage-migrator:
         condition: service_completed_successfully
