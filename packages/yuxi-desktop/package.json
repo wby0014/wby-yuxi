@@ -1,0 +1,17 @@
+{
+  "name": "yuxi-desktop",
+  "version": "0.1.0",
+  "description": "Yuxi macOS 桌面客户端",
+  "private": true,
+  "main": "src/main/index.js",
+  "scripts": {
+    "build:renderer": "bash scripts/build-renderer.sh",
+    "start": "npm run build:renderer && electron .",
+    "test": "node --test test/",
+    "dist": "npm run build:renderer && electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0"
+  }
+}
