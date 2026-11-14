@@ -1,0 +1,19 @@
+appId: com.yuxi.desktop
+productName: Yuxi Desktop
+directories:
+  output: dist
+  buildResources: build
+files:
+  - src/**/*
+  - renderer/**/*
+  - package.json
+  - "!**/*.map"
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.productivity
+  # 签名：替换为你的 Developer ID Application 证书全名后取消注释
+  # identity: "Developer ID Application: Your Name (TEAMID)"
+  # 公证：置 true 并导出 APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID
+  notarize: false
