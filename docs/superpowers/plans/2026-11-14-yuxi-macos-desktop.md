@@ -159,6 +159,9 @@ const crypto = require('node:crypto');
 function normalizeUrl(input) {
   const raw = String(input || '').trim();
   if (!raw) return { error: '实例地址不能为空' };
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw) && !/^https?:\/\//i.test(raw)) {
+    return { error: '仅支持 http/https 协议' };
+  }
   let url = raw;
   if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
   url = url.replace(/\/+$/, '');
