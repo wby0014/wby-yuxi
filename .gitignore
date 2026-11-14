@@ -82,4 +82,5 @@ docs/vibe
 
 .taskr/
 .workbuddy/
+.engram/
 web/src/utils/__tests__/
