@@ -31,3 +31,9 @@ docker/volumes/
 # 忽略 Docker 本身的文件
 Dockerfile
 docker-compose.yml
+
+# Electron dependencies and local artifacts
+desktop/node_modules/
+desktop/dist/
+desktop/web-dist/
+desktop/release/

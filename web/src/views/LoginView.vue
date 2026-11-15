@@ -45,6 +45,8 @@
               <p v-else class="welcome-text">欢迎登录</p>
             </header>
 
+            <p v-if="isDesktop" class="desktop-login-note">桌面端使用账号密码登录；企业单点登录请使用 Web 版。</p>
+
             <div class="login-content" :class="{ 'is-initializing': isFirstRun }">
               <!-- 初始化管理员表单 -->
               <div v-if="isFirstRun" class="login-form login-form--init">
@@ -279,6 +281,7 @@
 </template>
 
 <script setup>
+import { isDesktop } from '@/platform/runtime'
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -544,6 +547,11 @@ const handleOIDCLogin = async () => {
 
 // 检查 OIDC 配置
 const checkOIDCConfig = async () => {
+  if (isDesktop) {
+    oidcChecking.value = false
+    oidcEnabled.value = false
+    return null
+  }
   oidcChecking.value = true
   try {
     const config = await authApi.getOIDCConfig()
@@ -666,6 +674,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="less" scoped>
+.desktop-login-note { color: var(--gray-600); font-size: 12px; line-height: 1.6; margin-bottom: 16px; }
 .login-view {
   min-height: 100vh;
   width: 100%;

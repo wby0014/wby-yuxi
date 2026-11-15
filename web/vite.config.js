@@ -89,6 +89,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
+      ...(mode === 'desktop' ? { hmr: { protocol: 'ws', host: '127.0.0.1', port: 5173 } } : {}),
       proxy: {
         '^/api': {
           target: env.VITE_API_URL || 'http://api:5050',

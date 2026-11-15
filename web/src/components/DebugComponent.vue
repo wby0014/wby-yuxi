@@ -667,6 +667,7 @@
 </template>
 
 <script setup>
+import { saveSessionToken } from '@/platform/runtime'
 import { ref, reactive, computed, onMounted, onActivated, onUnmounted, nextTick, watch } from 'vue'
 import { useConfigStore } from '@/stores/config'
 import { useUserStore } from '@/stores/user'
@@ -1133,7 +1134,7 @@ const switchToUser = async (user) => {
       state.switchingUserId = user.id
       try {
         const data = await authApi.impersonateUser(user.id)
-        localStorage.setItem('user_token', data.access_token)
+        await saveSessionToken(data.access_token)
         message.success(`已切换为用户: ${user.username}`)
         showModal.value = false
         window.location.reload()

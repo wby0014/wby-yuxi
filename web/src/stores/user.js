@@ -1,3 +1,5 @@
+import { getSessionToken, saveSessionToken } from '@/platform/runtime'
+import { message } from 'ant-design-vue'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/apis/auth_api'
@@ -6,7 +8,7 @@ import { useProjectsStore } from './projects'
 
 export const useUserStore = defineStore('user', () => {
   // 状态
-  const token = ref(localStorage.getItem('user_token') || '')
+  const token = ref(getSessionToken())
   const userId = ref(null)
   const username = ref('')
   const uid = ref('')
@@ -22,7 +24,8 @@ export const useUserStore = defineStore('user', () => {
   const isSuperAdmin = computed(() => userRole.value === 'superadmin')
 
   // 动作
-  function applySession(data) {
+  async function applySession(data) {
+    await saveSessionToken(data.access_token)
     useProjectsStore().reset()
     token.value = data.access_token
     userId.value = data.user_id
@@ -33,13 +36,12 @@ export const useUserStore = defineStore('user', () => {
     userRole.value = data.role
     departmentId.value = data.department_id || null
     departmentName.value = data.department_name || ''
-    localStorage.setItem('user_token', data.access_token)
   }
 
   async function login(credentials) {
     try {
       const data = await authApi.login(credentials)
-      applySession(data)
+      await applySession(data)
       return true
     } catch (error) {
       console.error('登录错误:', error)
@@ -65,13 +67,15 @@ export const useUserStore = defineStore('user', () => {
     useProjectsStore().reset()
 
     // 只清除 token
-    localStorage.removeItem('user_token')
+    void saveSessionToken('').catch(() => {
+      message.error('本机登录凭据清理失败，请检查磁盘权限后重试退出登录')
+    })
   }
 
   async function initialize(admin) {
     try {
       const data = await authApi.initialize(admin)
-      applySession(data)
+      await applySession(data)
       return true
     } catch (error) {
       console.error('初始化管理员错误:', error)

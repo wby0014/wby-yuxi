@@ -24,6 +24,12 @@ Yuxi 是一个面向 RAG、知识图谱和多智能体工作流的知识库平�
 - `graph`：Neo4j 知识图谱。
 - `mineru-api`、`paddlex`：通过 `all` profile 可选启动的文档解析和 OCR 服务。
 
+## 桌面客户端
+
+`desktop/` 是同仓库的 Electron 客户端，复用 `web/` 构建的 Vue 页面并连接远程 Yuxi；开发与打包命令见 [desktop/README.md](desktop/README.md)。它不启动后端、模型或中间件，也不向 Agent 暴露用户本地目录、命令执行或本地 MCP。
+
+主进程拥有服务根地址、系统安全存储保护的会话与窗口生命周期。renderer 通过 `web/src/platform/runtime.js` 适配会话；浏览器保留原存储行为。打包页面使用固定 `app://yuxi/`，受限协议网关只把 `/api` 和 `/minio/public/` 转发到配置服务，沿用现有相对 API、上传与 SSE 调用。preload 仅提供读取状态、配置服务与保存会话三项能力。
+
 ## 后端代码地图
 
 后端分成两个顶层边界：`backend/server` 是 Web 应用入口与 HTTP 适配层，`backend/package/yuxi` 是业务和基础设施主体。新增领域逻辑通常优先放在 `yuxi` 包中，路由层只处理请求模型、认证上下文和响应装配。

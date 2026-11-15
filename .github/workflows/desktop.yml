@@ -1,0 +1,45 @@
+name: Desktop Quality
+
+on:
+  pull_request:
+    paths: ['desktop/**', 'web/**', '.github/workflows/desktop.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    timeout-minutes: 25
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      YUXI_QA_DIR: ${{ runner.temp }}/yuxi-desktop-qa
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: pnpm --dir web install --frozen-lockfile
+      - run: npm --prefix desktop ci
+      - run: npm --prefix desktop test
+      - run: pnpm --dir web run lint:check
+      - run: npm --prefix desktop run package:dir
+      - name: Real Electron window smoke (stub backend, no signing)
+        run: npm --prefix desktop run test:smoke
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: desktop-qa-${{ matrix.os }}
+          path: ${{ runner.temp }}/yuxi-desktop-qa/
+          if-no-files-found: ignore

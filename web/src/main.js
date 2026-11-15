@@ -1,3 +1,4 @@
+import { initializePlatform, isDesktop, getDesktopState } from '@/platform/runtime'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -8,6 +9,8 @@ import router from './router'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
 import '@/assets/css/main.css'
+
+await initializePlatform()
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -20,6 +23,6 @@ app.use(Antd)
 // 预加载信息配置
 import { useInfoStore } from '@/stores/info'
 const infoStore = useInfoStore()
-infoStore.loadInfoConfig()
+if (!isDesktop || getDesktopState().serverUrl) infoStore.loadInfoConfig()
 
 app.mount('#app')

@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import { saveSessionToken } from '@/platform/runtime'
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -79,8 +80,8 @@ const handleCallback = async () => {
     userStore.departmentId = tokenData.department_id || null
     userStore.departmentName = tokenData.department_name || ''
 
-    // 保存 token 到 localStorage
-    localStorage.setItem('user_token', tokenData.access_token)
+    // 按平台持久化登录会话
+    await saveSessionToken(tokenData.access_token)
 
     // 显示成功消息
     message.success('登录成功')

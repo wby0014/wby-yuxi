@@ -1,0 +1,29 @@
+{
+  "name": "yuxi-desktop",
+  "version": "0.7.3",
+  "private": true,
+  "description": "Yuxi remote-service desktop client",
+  "author": "Yuxi contributors",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/main.cjs",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test:smoke": "node test/electron-smoke.mjs",
+    "typecheck": "tsc --noEmit",
+    "build:main": "esbuild src/main.ts src/preload.ts --bundle --platform=node --format=cjs --external:electron --outdir=dist --out-extension:.js=.cjs",
+    "build:web": "node scripts/build-web.mjs",
+    "build": "npm run typecheck && npm run build:web && npm run build:main",
+    "package:dir": "npm run build && electron-builder --dir --publish never",
+    "package": "npm run build && electron-builder --publish never"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,23 @@
+appId: com.yuxi.desktop
+productName: Yuxi
+copyright: Copyright © Yuxi contributors
+directories:
+  output: release
+files:
+  - dist/**
+  - web-dist/**
+  - package.json
+asar: true
+npmRebuild: false
+publish: null
+mac:
+  identity: null
+  category: public.app-category.productivity
+  target: [dmg]
+  hardenedRuntime: true
+win:
+  target: [nsis]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
