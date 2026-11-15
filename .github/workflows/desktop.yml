@@ -1,0 +1,56 @@
+name: Desktop Quality
+
+on:
+  pull_request:
+    paths:
+      - 'packages/yuxi-desktop/**'
+      - 'web/**'
+      - '.github/workflows/desktop.yml'
+  push:
+    tags: ['v[0-9]*']
+    branches: [main]
+    paths:
+      - 'packages/yuxi-desktop/**'
+      - 'web/**'
+      - '.github/workflows/desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: macOS Electron and package smoke
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/yuxi-desktop/package-lock.json
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: npm ci
+        working-directory: packages/yuxi-desktop
+      - run: npm test
+        working-directory: packages/yuxi-desktop
+      - run: npm run build:renderer
+        working-directory: packages/yuxi-desktop
+      - run: npm run test:e2e
+        working-directory: packages/yuxi-desktop
+        env:
+          YUXI_DESKTOP_ARTIFACT_DIR: ${{ runner.temp }}/desktop-screenshots
+      - name: Assemble unsigned app without publishing
+        run: npx --no-install electron-builder --dir --publish never
+        working-directory: packages/yuxi-desktop
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: desktop-screenshots
+          path: ${{ runner.temp }}/desktop-screenshots
+          if-no-files-found: ignore

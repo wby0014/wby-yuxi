@@ -1,16 +1,16 @@
 'use strict';
 
-const { Menu } = require('electron');
-
 /**
  * 构建应用菜单。实例列表由 repo 提供；切换后 index.js 会 rebuildMenu()。
  */
-function buildMenu({ repo, onOpenSettings, onSwitchInstance }) {
+function buildMenu({ Menu, repo, onOpenSettings, onOpenMain, onSwitchInstance }) {
   const template = [
     ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
     {
       label: '实例',
       submenu: [
+        { label: '打开主窗口', click: onOpenMain },
+        { type: 'separator' },
         ...repo.list().map((inst) => ({
           label: inst.name,
           type: 'radio',

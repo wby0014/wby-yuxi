@@ -10,6 +10,8 @@ on:
       - "backend/uv.lock"
       - "packages/yuxi-cli/pyproject.toml"
       - "packages/yuxi-cli/uv.lock"
+      - "packages/yuxi-desktop/package.json"
+      - "packages/yuxi-desktop/package-lock.json"
       - "web/package.json"
       - "web/pnpm-lock.yaml"
       - "web/pnpm-workspace.yaml"
@@ -28,6 +30,8 @@ on:
       - "backend/uv.lock"
       - "packages/yuxi-cli/pyproject.toml"
       - "packages/yuxi-cli/uv.lock"
+      - "packages/yuxi-desktop/package.json"
+      - "packages/yuxi-desktop/package-lock.json"
       - "web/package.json"
       - "web/pnpm-lock.yaml"
       - "web/pnpm-workspace.yaml"
@@ -45,6 +49,19 @@ permissions:
   contents: read
 
 jobs:
+  desktop:
+    name: Desktop runtime and build dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # Electron 在 devDependencies 声明，但其二进制进入最终 App，必须纳入审计。
+      - run: npm audit --audit-level=high
+        working-directory: packages/yuxi-desktop
+
   python:
     name: Python vulnerabilities and licenses
     runs-on: ubuntu-latest

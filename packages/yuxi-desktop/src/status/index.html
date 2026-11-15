@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'" />
+  <title>连接 Yuxi</title>
+  <link rel="stylesheet" href="/standalone/base.css" />
+  <link rel="stylesheet" href="/standalone/base.dark.css" />
+  <link rel="stylesheet" href="/__desktop/style.css" />
+  <script src="/__desktop/theme.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1 id="title">连接 Yuxi</h1>
+    <p id="instance" class="muted"></p>
+    <p id="message" role="status" aria-live="polite">正在读取实例状态…</p>
+    <div class="actions">
+      <button id="retry" class="primary">重新连接</button>
+      <button id="settings">实例设置</button>
+    </div>
+    <p id="version" class="muted"></p>
+  </main>
+  <script src="/__desktop/status.js"></script>
+</body>
+</html>

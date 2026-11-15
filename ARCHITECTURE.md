@@ -76,6 +76,12 @@ Yuxi 只交付完整知识能力路径。API 始终注册 `external_kb`、`knowl
 
 `/` 是公开首页；登录后的核心工作区是 `/agent`。`/extensions` 对所有登录用户开放，其中 Skills 对普通用户可见，知识库、工具和 MCP 管理能力仅管理员可见；Dashboard 仅超级管理员可访问。后端权限检查始终是最终边界，前端守卫只负责页面体验。
 
+### macOS 桌面入口
+
+`packages/yuxi-desktop` 使用 Electron 加载本地构建的 Web，通过 `app://yuxi` 提供静态资源，并流式转发 API 与公开对象请求到固定实例。主进程拥有实例配置、窗口、会话和原生入口；每个实例使用独立 Session，实例切换串行关闭旧窗口、取消请求和清理登录态，再发布新目标。preload 只暴露受限桥接，IPC 在副作用前检查窗口与顶层 frame，OIDC 授权由无 preload 的独立窗口完成。
+
+桌面沿用服务端权限、持久化与 worker 链路，启动前检查 readiness 和打包界面版本。开发、测试与签名发布入口见[桌面说明](packages/yuxi-desktop/README.md)。
+
 ## 智能体运行链路
 
 一次普通智能体请求经过以下边界：

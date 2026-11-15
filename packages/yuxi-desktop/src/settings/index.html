@@ -3,29 +3,50 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>Yuxi 实例设置</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 24px; color: #222; }
-    h1 { font-size: 18px; }
-    form { display: flex; gap: 8px; margin: 16px 0; }
-    input { flex: 1; padding: 6px 8px; }
-    ul { list-style: none; padding: 0; }
-    li { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
-    li span { flex: 1; }
-    .err { color: #c00; }
-  </style>
+  <link rel="stylesheet" href="/standalone/base.css" />
+  <link rel="stylesheet" href="/standalone/base.dark.css" />
+  <link rel="stylesheet" href="/__desktop/style.css" />
+  <script src="/__desktop/theme.js" defer></script>
 </head>
 <body>
   <main>
-    <h1>Yuxi 实例</h1>
-    <form id="add-form">
-      <input id="name" placeholder="名称（如：生产环境）" />
-      <input id="url" placeholder="地址（如 yuxi.example.com）" />
-      <button type="submit">添加</button>
-    </form>
-    <ul id="list"></ul>
-    <p id="error" class="err"></p>
+    <h1>实例设置</h1>
+    <p class="muted">添加本地或远程 Yuxi 服务。切换实例需要重新登录。</p>
+    <section aria-labelledby="form-title">
+      <h2 id="form-title">添加实例</h2>
+      <form id="instance-form">
+        <label for="name">实例名称</label>
+        <input id="name" name="name" placeholder="例如：团队知识库" required maxlength="100" />
+        <label for="url">服务地址</label>
+        <input id="url" name="url" placeholder="https://yuxi.example.com" required autocomplete="url" />
+        <p class="muted">填写域名与可选端口，不含路径、账号或密码。</p>
+        <div class="actions">
+          <button id="save" type="submit" class="primary">添加实例</button>
+          <button id="check" type="button">测试连接</button>
+          <button id="cancel-edit" type="button" hidden>取消编辑</button>
+        </div>
+      </form>
+    </section>
+    <p id="message" role="status" aria-live="polite"></p>
+    <p id="error" role="alert"></p>
+    <section aria-labelledby="list-title">
+      <h2 id="list-title">已保存的实例</h2>
+      <p id="empty" class="muted">尚未添加实例，填写上方信息后即可连接。</p>
+      <ul id="list"></ul>
+    </section>
+    <p id="version" class="muted"></p>
   </main>
-  <script src="./settings.js"></script>
+  <dialog id="delete-dialog" aria-labelledby="delete-title">
+    <h2 id="delete-title">删除实例</h2>
+    <p id="delete-description"></p>
+    <p class="muted">只移除本机连接配置，服务端数据会保留。</p>
+    <div class="actions">
+      <button id="cancel-delete">取消</button>
+      <button id="confirm-delete" class="danger">删除实例</button>
+    </div>
+  </dialog>
+  <script src="/__desktop/settings.js"></script>
 </body>
 </html>

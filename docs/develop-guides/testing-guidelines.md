@@ -110,6 +110,18 @@ docker compose exec web pnpm run test:unit
 docker compose exec web pnpm run build
 ```
 
+macOS 桌面端：
+
+```bash
+cd packages/yuxi-desktop
+npm test
+npm run build:renderer
+npm run test:e2e
+npx --no-install electron-builder --dir --publish never
+```
+
+桌面 Electron 测试使用真实运行时和确定性 HTTP 对端，回读 DOM、实例会话、流与下载文件。它证明桌面协议、登录适配和隔离边界；真实 API、worker、外部身份服务与跨机器安装分别需要对应环境验证。安装、实例连接和正式签名命令见[桌面说明](https://github.com/xerrors/Yuxi/blob/main/packages/yuxi-desktop/README.md)。
+
 CLI：
 
 ```bash

@@ -1082,19 +1082,20 @@ const setLangfuseRunOpening = (runId, opening) => {
 const openRunInLangfuse = async (runId) => {
   if (!runId || isLangfuseRunOpening(runId)) return
 
-  const targetWindow = window.open('about:blank', '_blank')
-  if (!targetWindow) {
+  const desktop = window.yuxiDesktop
+  const targetWindow = desktop ? null : window.open('about:blank', '_blank')
+  if (!desktop && !targetWindow) {
     message.warning('浏览器阻止了新标签页，请允许弹窗后重试')
     return
   }
-  targetWindow.opener = null
+  if (targetWindow) targetWindow.opener = null
   setLangfuseRunOpening(runId, true)
 
   try {
     const result = await agentApi.getAgentRunLangfuseLink(runId)
     const traceUrl = resolveLangfuseRunUrl(result)
     if (!traceUrl) {
-      targetWindow.close()
+      targetWindow?.close()
       if (result?.reason === 'trace_not_available') {
         message.warning('该 Run 暂无可用的 Langfuse Trace')
       } else {
@@ -1102,9 +1103,10 @@ const openRunInLangfuse = async (runId) => {
       }
       return
     }
-    targetWindow.location.replace(traceUrl)
+    if (desktop) await desktop.openExternal(traceUrl)
+    else targetWindow.location.replace(traceUrl)
   } catch {
-    targetWindow.close()
+    targetWindow?.close()
     message.error('获取 Langfuse 跳转地址失败，请稍后重试')
   } finally {
     setLangfuseRunOpening(runId, false)

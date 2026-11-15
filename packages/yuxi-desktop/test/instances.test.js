@@ -33,3 +33,15 @@ test('createInstancesRepo 增删切换', () => {
   assert.strictEqual(repo.remove('b'), true);
   assert.strictEqual(repo.current().id, 'a'); // 删除当前后回退到剩余首个
 });
+
+test('重复地址、未知实例和包含路径或凭据的地址显式失败', () => {
+  const repo = createInstancesRepo();
+  repo.add({ id: 'a', name: 'A', url: 'https://a.example' });
+  repo.add({ id: 'b', name: 'B', url: 'https://b.example' });
+  assert.throws(() => repo.add({ id: 'c', name: 'C', url: 'https://a.example' }), /已经存在/);
+  assert.throws(() => repo.update('b', { name: 'B', url: 'https://a.example' }), /已经存在/);
+  assert.throws(() => repo.setCurrent('missing'), /不存在/);
+  for (const url of ['https://a.example/path', 'https://u:p@a.example', 'https://a.example/?key=value']) {
+    assert.ok(normalizeUrl(url).error);
+  }
+});

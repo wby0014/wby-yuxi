@@ -29,3 +29,11 @@ test('损坏文件返回空并保留备份', () => {
   assert.deepStrictEqual(loadInstancesFile(file), { instances: [], currentId: null });
   assert.ok(fs.readdirSync(dir).some((f) => f.startsWith('bad.json.corrupt-')));
 });
+
+test('结构损坏与非法持久化地址备份后拒绝加载', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yuxi-'));
+  const file = path.join(dir, 'invalid.json');
+  fs.writeFileSync(file, JSON.stringify({ instances: [{ id: '../escape', name: 'A', url: 'file:///tmp' }] }));
+  assert.deepStrictEqual(loadInstancesFile(file), { instances: [], currentId: null });
+  assert.ok(fs.readdirSync(dir).some((name) => name.startsWith('invalid.json.corrupt-')));
+});

@@ -293,7 +293,7 @@ import {
   Key as KeyIcon,
   AlertCircle as ExclamationCircleIcon
 } from '@lucide/vue'
-import { tryAutoStartOIDC, sanitizeRedirect } from '@/utils/oidcAutoStart'
+import { tryAutoStartOIDC, sanitizeRedirect, startOIDCLogin } from '@/utils/oidcAutoStart'
 import { MIN_PASSWORD_LENGTH } from '@/utils/passwordValidation'
 
 const router = useRouter()
@@ -521,19 +521,11 @@ const handleOIDCLogin = async () => {
     oidcLoading.value = true
     errorMessage.value = ''
 
-    // 获取 OIDC 登录 URL
-    const response = await authApi.getOIDCLoginUrl()
-    if (response.login_url) {
-      // 保存当前路径，以便登录后返回
-      const redirectPath =
-        sessionStorage.getItem('redirect') || router.currentRoute.value.query.redirect || '/'
-      sessionStorage.setItem('oidc_redirect', redirectPath)
-
-      // 跳转到 OIDC Provider
-      window.location.href = response.login_url
-    } else {
-      errorMessage.value = '获取 OIDC 登录地址失败'
-    }
+    const redirectPath = sanitizeRedirect(
+      sessionStorage.getItem('redirect') || router.currentRoute.value.query.redirect || '/'
+    )
+    sessionStorage.setItem('oidc_redirect', redirectPath)
+    await startOIDCLogin(() => authApi.getOIDCLoginUrl())
   } catch (error) {
     console.error('OIDC 登录失败:', error)
     errorMessage.value = error.message || 'OIDC 登录失败，请重试'

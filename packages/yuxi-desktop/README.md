@@ -1,79 +1,62 @@
-# yuxi-desktop
+# Yuxi Desktop
 
-Yuxi 的 macOS 桌面客户端。用 Electron 壳**本地打包** `web/dist`，通过自定义 `app://` 协议复刻生产 nginx 行为：静态资源 + SPA 回退 + 把 `/api/*`、`/minio/public/*` 转发到「当前选中的 Yuxi 实例」。支持配置多个实例，签名公证后手动分发。
-
-## 目录结构
-
-```
-src/main/        Electron 主进程（协议转发、IPC、菜单、窗口）
-src/preload/     渲染进程 preload 桥（contextBridge）
-src/settings/    实例设置窗口（独立小页）
-renderer/        构建时从 ../../web/dist 拷贝（gitignore）
-test/            node:test 单元测试
-```
-
-## 前置条件
-
-- Node.js ≥ 20、npm
-- macOS（当前仅支持 macOS）
-- 一个运行中的 Yuxi 实例（本地 `docker compose up` 或远程部署）
+Yuxi 的 macOS 桌面客户端。Electron 加载本地打包的 Vue 页面，通过 `app://yuxi` 提供静态资源，并将 `/api/*`、`/minio/public/*` 转发到选中的 Yuxi 服务。业务状态、权限、知识库和智能体执行由服务端拥有；客户端运行需要已部署的 Yuxi 实例。
 
 ## 开发运行
 
+需要 macOS、Node.js 22 和 pnpm。以下命令从仓库根目录开始：
+
 ```bash
-# 0. 先构建前端（首次需 npm install）
-cd ../web && npm install && npm run build
-
-# 1. 复制前端产物到 renderer/
-cd ../packages/yuxi-desktop && npm run build:renderer
-
-# 2. 启动桌面客户端
+cd web
+pnpm install --frozen-lockfile
+cd ../packages/yuxi-desktop
+npm ci
 npm start
 ```
 
-首次启动会弹「请先配置实例」，填实例地址：
+`start`、`dist` 和 `dist:release` 都先从当前 Web 源码构建，再复制界面、主题和版本元数据到被 Git 忽略的 `renderer/`。首次启动显示本地引导和实例设置。实例地址只接受 HTTP(S) origin，例如 `http://localhost:5050` 或 `https://yuxi.example.com`，不含路径、凭据、查询或片段。
 
-- 本地 dev 拓扑：`http://localhost:5173`（Vite dev，同源代理 `/api` 和 `/minio/public/`）
-- 只测 API：`http://localhost:5050`
-- 生产：部署域名，如 `https://yuxi.example.com`
+客户端通过 `/api/system/ready` 检查连接，要求服务端版本与打包 Web 版本相同。连接失败、未就绪或版本不匹配时，本地状态页提供重新连接和实例设置入口。桌面版本与界面版本显示在设置和状态页中。
+
+## 实例与登录
+
+设置支持新增、编辑、测试连接、切换和确认删除。每个实例使用独立 Session；切换、删除当前实例或修改当前地址会关闭旧页面、取消在途请求并清理相关登录态，需要重新登录。仅修改名称保留当前页面。
+
+主窗口只加载本地界面，HTTP(S) 外链交系统浏览器。OIDC 使用独立、无特权授权窗，截获当前实例的一次性登录码后交由本地 Web 完成登录。关闭授权窗或切换实例会取消登录。真实身份提供方的兼容性需要在部署环境验证。
+
+macOS 菜单提供主窗口恢复和实例入口；客户端使用单实例锁并保存可见窗口位置。设置与本地状态页跟随系统深浅主题。
 
 ## 测试
 
+先构建界面，再运行真实 Electron 测试：
+
 ```bash
-npm test   # 即 node --test，自动发现 test/*.test.js
+npm test
+npm run build:renderer
+npm run test:e2e
+npm audit --audit-level=high
 ```
 
-## 打包（无签名 dev 构建）
+单测验证配置、隔离时序、IPC、协议、授权和发布拒绝条件。Electron 测试启动确定性 HTTP 对端并读取真实 DOM、会话、流与下载文件，覆盖桌面壳边界；服务端业务验证遵循[测试规范](../../docs/develop-guides/testing-guidelines.md)。设置浅深色、窄窗口和连接错误截图默认保存在测试临时目录，可通过 `YUXI_DESKTOP_ARTIFACT_DIR` 指定输出位置。
+
+## 本地打包
 
 ```bash
 npm run dist
 ```
 
-产物在 `dist/`：`Yuxi Desktop.app`（`dist/mac-arm64/`）、`-arm64-mac.zip`、`-arm64.dmg`。
+产物在 `dist/`，架构跟随构建机器。基础配置显式关闭正式签名和公证，适合本机开发验证。CI 在 macOS 运行单测、Electron 测试及 `electron-builder --dir` 组装检查。
 
-### ⚠️ 两个网络相关的坑
+## 正式签名与公证
 
-1. **Electron 二进制下载需要镜像**。默认 CDN 在本环境 `fetch failed`，安装/打包都要带 `ELECTRON_MIRROR`：
-
-   ```bash
-   ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npm install
-   ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npm run dist
-   ```
-
-2. **dmg 目标末尾可能卡在 `Timeout awaiting 'request' for 600000ms`**（网络超时）。`zip`/`.app` 不受影响；dmg 可用 `hdiutil` 本地补：
-
-   ```bash
-   hdiutil create -volname "Yuxi Desktop" \
-     -srcfolder "dist/mac-arm64/Yuxi Desktop.app" \
-     -ov -format UDZO "dist/Yuxi Desktop-0.1.0-arm64.dmg"
-   ```
-
-## 签名 + 公证
-
-编辑 `electron-builder.yml`：取消 `mac.identity` 注释填入 Developer ID Application 证书全名，`mac.notarize: true`；再导出环境变量后 `npm run dist`：
+在 macOS 钥匙串安装 Developer ID Application 证书，配置以下环境变量后执行：
 
 ```bash
-export APPLE_ID="your@email.com"
-export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+export CSC_NAME="Developer ID Application: Example Company (TEAMID)"
+export APPLE_ID="release@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="<app-specific-password>"
 export APPLE_TEAM_ID="TEAMID"
+npm run dist:release
 ```
+
+发布入口在开始构建前检查配置，启用强制签名、Hardened Runtime 和 Apple 公证。构建后验证当前架构应用的签名团队、公证票据与 Gatekeeper，任一失败都会退出。产物写入 `dist/release-<arch>/`，命令只生成本机产物。分发前需要在另一台 Mac 验证安装、首次启动、登录、文件和流式会话。

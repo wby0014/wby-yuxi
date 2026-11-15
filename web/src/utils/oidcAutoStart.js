@@ -1,5 +1,18 @@
 const AUTO_START_KEY = 'oidc_auto_start_attempted'
 
+/** 桌面通过隔离授权窗获取一次性码，浏览器沿既有站点跳转。 */
+export async function startOIDCLogin(getOIDCLoginUrl) {
+  if (window.yuxiDesktop?.authorizeOIDC) {
+    const { code } = await window.yuxiDesktop.authorizeOIDC()
+    if (!code) throw new Error('登录回调缺少授权码')
+    window.location.href = `/auth/oidc/callback?${new URLSearchParams({ code })}`
+    return
+  }
+  const response = await getOIDCLoginUrl()
+  if (!response?.login_url) throw new Error('获取 OIDC 登录地址失败')
+  window.location.href = response.login_url
+}
+
 // 对 redirect 参数进行安全校验，防止开放重定向漏洞
 // - 必须是字符串类型
 // - 必须以 / 开头（本地相对路径）
@@ -59,18 +72,6 @@ export async function tryAutoStartOIDC(getOIDCLoginUrl, config) {
     return false
   }
 
-  // 5. 获取 OIDC 登录 URL 并跳转
-  let loginUrlResp
-  try {
-    loginUrlResp = await getOIDCLoginUrl()
-  } catch {
-    return false
-  }
-
-  if (!loginUrlResp || !loginUrlResp.login_url) {
-    return false
-  }
-
   // 保存当前路径，登录后返回（安全校验）
   const redirectPath = sanitizeRedirect(params.get('redirect'))
   sessionStorage.setItem('oidc_redirect', redirectPath)
@@ -78,6 +79,11 @@ export async function tryAutoStartOIDC(getOIDCLoginUrl, config) {
   // 标记已尝试，防止下次再自动触发
   markAutoStartAttempted()
 
-  window.location.href = loginUrlResp.login_url
-  return true
+  try {
+    await startOIDCLogin(getOIDCLoginUrl)
+    return true
+  } catch {
+    clearAutoStartAttempt()
+    return false
+  }
 }
