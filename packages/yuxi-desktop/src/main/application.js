@@ -38,7 +38,7 @@ class DesktopApplication {
     if (!this.repo.current()) this.openSettings();
   }
 
-  /** 串行提交实例变化；旧窗口销毁后才允许改变目标地址。 */
+  /** 串行提交实例变化；先持久化成功，再销毁旧窗口并切换目标地址。 */
   changeInstances(operation) {
     const change = this.changes.catch(() => {}).then(async () => {
       const next = createInstancesRepo(this.repo.snapshot());
@@ -46,18 +46,19 @@ class DesktopApplication {
       const before = this.repo.current();
       const after = next.current();
       const changed = before?.id !== after?.id || before?.url !== after?.url;
+      // 先落盘再破坏性切换：写盘失败时内存态、窗口与会话均保持不变，不把当前实例登出。
+      this.persistInstances(next.snapshot());
+      this.repo = next;
       try {
         if (changed) {
           await this.closeMainWindow();
           if (before) await this.clearInstanceSession(before);
           if (after && after.id !== before?.id) await this.clearInstanceSession(after);
         }
-        this.persistInstances(next.snapshot());
       } catch (error) {
         if (changed) await this.ensureMainWindow().catch(() => {});
         throw error;
       }
-      this.repo = next;
       this.refreshMenus();
       this.notifySettings();
       if (changed) await this.ensureMainWindow();

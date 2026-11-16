@@ -61,3 +61,13 @@ test('关闭、实例切换与缺少授权码均显式失败', async (t) => {
   invalid.window.webContents.emit('will-redirect', { url: 'https://instance.example/auth/oidc/callback', isMainFrame: true, preventDefault() {} });
   await assert.rejects(invalid.result, /有效授权码/);
 });
+
+test('接受 RFC 6749 可见 ASCII 的合法授权码，不按 base64url 子集误拒', async (t) => {
+  const { window, result } = await fixture(t);
+  const code = 'ABCDef-._~=+/0123456789abcdefghij';
+  window.webContents.emit('will-redirect', {
+    url: `https://instance.example/auth/oidc/callback?code=${encodeURIComponent(code)}`,
+    isMainFrame: true, preventDefault() {},
+  });
+  assert.deepEqual(await result, { code });
+});

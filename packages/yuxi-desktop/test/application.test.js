@@ -16,7 +16,8 @@ function fixture() {
     currentId: 'a',
   });
   const events = [];
-  desktop.closeMainWindow = async () => events.push(['close', desktop.repo.current()?.id]);
+  desktop.boundInstance = desktop.repo.current();
+  desktop.closeMainWindow = async () => events.push(['close', desktop.boundInstance?.id]);
   desktop.clearInstanceSession = async (instance) => events.push(['clear', instance.id]);
   desktop.persistInstances = (state) => events.push(['save', state.currentId]);
   desktop.ensureMainWindow = async () => events.push(['open', desktop.repo.current()?.id]);
@@ -25,11 +26,11 @@ function fixture() {
   return { desktop, events };
 }
 
-test('删除当前实例先关闭旧窗口并清理会话，再发布新实例', async () => {
+test('删除当前实例先持久化新目标，再关闭旧窗口并清理会话', async () => {
   const { desktop, events } = fixture();
   await desktop.changeInstances((repo) => repo.remove('a'));
   assert.equal(desktop.repo.current().id, 'b');
-  assert.deepEqual(events, [['close', 'a'], ['clear', 'a'], ['clear', 'b'], ['save', 'b'], ['open', 'b']]);
+  assert.deepEqual(events, [['save', 'b'], ['close', 'a'], ['clear', 'a'], ['clear', 'b'], ['open', 'b']]);
 });
 
 test('删除最后实例进入本地配置页，仍清理旧凭据', async () => {
@@ -37,7 +38,7 @@ test('删除最后实例进入本地配置页，仍清理旧凭据', async () =>
   desktop.repo.remove('b');
   await desktop.changeInstances((repo) => repo.remove('a'));
   assert.equal(desktop.repo.current(), null);
-  assert.deepEqual(events, [['close', 'a'], ['clear', 'a'], ['save', null], ['open', undefined]]);
+  assert.deepEqual(events, [['save', null], ['close', 'a'], ['clear', 'a'], ['open', undefined]]);
 });
 
 test('编辑当前实例地址也执行隔离，而只改名称保持窗口', async () => {
@@ -47,7 +48,7 @@ test('编辑当前实例地址也执行隔离，而只改名称保持窗口', as
   assert.equal(desktop.boundInstance.name, '改名');
   events.length = 0;
   await desktop.changeInstances((repo) => repo.update('a', { name: '改名', url: 'https://new.example' }));
-  assert.deepEqual(events, [['close', 'a'], ['clear', 'a'], ['save', 'a'], ['open', 'a']]);
+  assert.deepEqual(events, [['save', 'a'], ['close', 'a'], ['clear', 'a'], ['open', 'a']]);
 });
 
 test('并发切换串行提交，失败操作不阻塞后续操作', async () => {
@@ -61,12 +62,12 @@ test('并发切换串行提交，失败操作不阻塞后续操作', async () =>
   assert.deepEqual(events.filter(([event]) => event === 'open'), [['open', 'b'], ['open', 'a']]);
 });
 
-test('持久化失败不发布新代理目标并恢复旧实例窗口', async () => {
+test('持久化失败不发布新代理目标且不清除当前会话', async () => {
   const { desktop, events } = fixture();
   desktop.persistInstances = () => { throw new Error('磁盘写入失败'); };
   await assert.rejects(desktop.changeInstances((repo) => repo.setCurrent('b')), /磁盘写入失败/);
   assert.equal(desktop.repo.current().id, 'a');
-  assert.deepEqual(events.at(-1), ['open', 'a']);
+  assert.deepEqual(events, []);
 });
 
 test('恢复主窗口排在实例清理之后，并发原生入口只保留一个窗口', async () => {

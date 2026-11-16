@@ -30,3 +30,10 @@ test('合法 JSON 中的 null、标量和数组按缺省窗口配置恢复', (t)
     assert.deepEqual(windowBounds(file, displays), { width: 1280, height: 800 });
   }
 });
+
+test('空显示器列表按默认窗口尺寸恢复，不抛错', (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'yuxi-bounds-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const file = path.join(directory, 'window.json');
+  assert.deepEqual(windowBounds(file, []), { width: 1280, height: 800 });
+});

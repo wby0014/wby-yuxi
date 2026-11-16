@@ -7,7 +7,8 @@ function windowBounds(file, displays) {
   let saved;
   try { saved = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { saved = {}; }
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) saved = {};
-  const primary = displays[0].workArea;
+  const primary = displays[0]?.workArea;
+  if (!primary) return { width: 1280, height: 800 };
   const width = Math.min(Math.max(Number.isFinite(saved.width) ? saved.width : 1280, 720), primary.width);
   const height = Math.min(Math.max(Number.isFinite(saved.height) ? saved.height : 800, 480), primary.height);
   const visible = Number.isFinite(saved.x) && Number.isFinite(saved.y) && displays.some(({ workArea: area }) =>

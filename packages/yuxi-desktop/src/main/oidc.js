@@ -38,7 +38,8 @@ async function authorizeOIDC({ BrowserWindow, parent, instance, fetch, signal })
       if (url.pathname === '/auth/oidc/callback') {
         event.preventDefault();
         const code = url.searchParams.get('code');
-        if (!code || !/^[A-Za-z0-9_-]{16,512}$/.test(code)) finish(new Error('登录回调缺少有效授权码'));
+        // RFC 6749 授权码为不透明可见 ASCII（VSCHAR），勿按 base64url 子集误拒含 .=~+/ 的合法码。
+        if (!code || !/^[\x21-\x7e]{16,512}$/.test(code)) finish(new Error('登录回调缺少有效授权码'));
         else finish(null, code);
       } else if (url.pathname === '/login' && url.searchParams.has('oidc_error')) {
         event.preventDefault();
