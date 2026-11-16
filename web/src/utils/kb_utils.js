@@ -18,7 +18,7 @@ export const brandIcons = {
 export const getKbTypeLabel = (type) => {
   const normalized = String(type || '').toLowerCase()
   const labels = {
-    milvus: 'Yuxi',
+    milvus: '内置知识库',
     dify: 'Dify',
     notion: 'Notion'
   }

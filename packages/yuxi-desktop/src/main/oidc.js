@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const { externalUrl } = require('./security');
 
 /** 在无特权的独立窗口完成授权，只交回当前实例的一次性登录码。 */
-async function authorizeOIDC({ BrowserWindow, parent, instance, fetch, signal }) {
+async function authorizeOIDC({ BrowserWindow, parent, instance, fetch, signal, productName }) {
   const response = await fetch(`${instance.url}/api/auth/oidc/login-url`, {
     signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]), redirect: 'error',
   });
@@ -14,7 +14,7 @@ async function authorizeOIDC({ BrowserWindow, parent, instance, fetch, signal })
   signal.throwIfAborted();
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
-      parent, width: 560, height: 760, title: 'Yuxi 账户登录',
+      parent, width: 560, height: 760, title: `${productName} 账户登录`,
       webPreferences: { partition: `oidc-${crypto.randomUUID()}`, contextIsolation: true, sandbox: true, nodeIntegration: false },
     });
     let finished = false;

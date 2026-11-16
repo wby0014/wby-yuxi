@@ -980,16 +980,17 @@ const cancellingRequestIds = reactive(new Set())
 const steeringRequestIds = reactive(new Set())
 let sendCooldownTimer = null
 // 预设的打招呼文本
-const greetingMessages = [
-  '语析，析万物之语',
-  '语析，与知识对话',
+const greetingMessages = computed(() => [
+  `你好，这里是${infoStore.productName}`,
+  `${infoStore.productName}，与知识对话`,
   '答案藏在知识里，我来找',
   '与知识对话，与答案相遇',
   '你负责提问，我负责寻找'
-]
+])
 
 // 随机选择一个打招呼文本
-const randomGreeting = greetingMessages[Math.floor(Math.random() * greetingMessages.length)]
+const greetingIndex = Math.floor(Math.random() * greetingMessages.value.length)
+const randomGreeting = computed(() => greetingMessages.value[greetingIndex])
 
 // 业务状态（保留在组件本地）
 const chatState = reactive({

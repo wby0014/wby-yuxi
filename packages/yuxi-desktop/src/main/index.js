@@ -26,7 +26,7 @@ if (!app.requestSingleInstanceLock()) {
     desktop = new DesktopApplication(electron, app.getPath('userData'));
     await desktop.start();
   }).catch(() => {
-    electron.dialog.showErrorBox('Yuxi 启动失败', '无法读取客户端资源或配置，请重新构建或安装客户端');
+    electron.dialog.showErrorBox('客户端启动失败', '无法读取客户端资源或配置，请重新构建或安装客户端');
     app.quit();
   });
 }

@@ -62,3 +62,16 @@ def test_serialize_system_config_includes_field_metadata():
 
     assert result["default_model"] == "test-provider:latest"
     assert result["_config_items"]["default_model"]["type"] == "model"
+
+
+def test_info_endpoint_rejects_invalid_brand_config(tmp_path, monkeypatch):
+    brand_file = tmp_path / "brand.yaml"
+    brand_file.write_text("branding: {name: ''}", encoding="utf-8")
+    monkeypatch.setenv("YUXI_BRAND_FILE_PATH", str(brand_file))
+    app = FastAPI()
+    app.include_router(system, prefix="/api")
+
+    response = TestClient(app).get("/api/system/info")
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "获取信息配置失败"

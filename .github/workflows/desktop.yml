@@ -5,6 +5,7 @@ on:
     paths:
       - 'packages/yuxi-desktop/**'
       - 'web/**'
+      - 'backend/package/yuxi/config/static/**'
       - '.github/workflows/desktop.yml'
   push:
     tags: ['v[0-9]*']
@@ -12,6 +13,7 @@ on:
     paths:
       - 'packages/yuxi-desktop/**'
       - 'web/**'
+      - 'backend/package/yuxi/config/static/**'
       - '.github/workflows/desktop.yml'
   workflow_dispatch:
 

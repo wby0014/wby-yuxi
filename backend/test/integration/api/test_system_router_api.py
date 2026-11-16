@@ -119,7 +119,11 @@ async def test_info_endpoint_is_public(test_client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["success"] is True
-    assert "data" in payload
+    config = payload["data"]
+    assert isinstance(config["branding"]["name"], str)
+    assert config["branding"]["name"].strip()
+    assert "{{PRODUCT_NAME}}" not in response.text
+    assert "{{YUXI_VERSION}}" not in response.text
 
 
 async def test_config_get_requires_login_and_update_requires_admin(test_client, standard_user):

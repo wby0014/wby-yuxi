@@ -24,6 +24,7 @@ async function fixture(t) {
   }
   const controller = new AbortController();
   const result = authorizeOIDC({
+    productName: '测试工作台',
     BrowserWindow: AuthWindow, instance: { url: 'https://instance.example' },
     fetch: async () => Response.json({ login_url: 'https://identity.example/authorize' }), signal: controller.signal,
   });
@@ -35,6 +36,7 @@ async function fixture(t) {
 test('授权窗口没有 preload，只接受当前实例顶层回调的一次性码', async (t) => {
   const { window, result } = await fixture(t);
   assert.equal(window.options.webPreferences.preload, undefined);
+  assert.equal(window.options.title, '测试工作台 账户登录');
   assert.equal(window.options.webPreferences.sandbox, true);
   assert.match(window.url, /^https:\/\/identity.example/);
   const event = { url: 'https://other.example/auth/oidc/callback?code=wrong-instance-code', isMainFrame: true, preventDefault() { this.prevented = true; } };

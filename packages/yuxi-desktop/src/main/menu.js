@@ -1,11 +1,10 @@
 'use strict';
 
-/**
- * 构建应用菜单。实例列表由 repo 提供；切换后 index.js 会 rebuildMenu()。
- */
+/** 构建原生快捷键菜单与实例入口。 */
 function buildMenu({ Menu, repo, onOpenSettings, onOpenMain, onSwitchInstance }) {
   const template = [
     ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
+    { role: 'fileMenu' },
     {
       label: '实例',
       submenu: [

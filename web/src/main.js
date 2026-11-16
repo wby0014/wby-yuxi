@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, watch } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
@@ -20,6 +20,7 @@ app.use(Antd)
 // 预加载信息配置
 import { useInfoStore } from '@/stores/info'
 const infoStore = useInfoStore()
+watch(() => infoStore.productName, (name) => { document.title = name }, { immediate: true })
 infoStore.loadInfoConfig()
 
 app.mount('#app')

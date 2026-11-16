@@ -40,6 +40,8 @@ export const useInfoStore = defineStore('info', () => {
       }
   )
 
+  const productName = computed(() => branding.value.name?.trim() || '知识工作台')
+
   // 计算属性 - 页脚信息
   const footer = computed(() => ({
     copyright: '',
@@ -127,6 +129,7 @@ export const useInfoStore = defineStore('info', () => {
     // 计算属性
     organization,
     branding,
+    productName,
     footer,
 
     // 方法

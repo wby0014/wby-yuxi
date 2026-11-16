@@ -1,6 +1,23 @@
 # 自定义品牌信息
 
-Yuxi 的品牌配置分为两部分：后端读取的站点信息，以及前端源码中的主题样式。前者可以通过 YAML 文件替换名称、Logo 和协议链接；后者需要修改前端资源。
+部署者通过同一份品牌 YAML 设置 Web 与桌面端的产品展示名称、Logo 和协议链接；主题颜色通过前端样式调整。
+
+## 统一产品名称
+
+默认入口是 `backend/package/yuxi/config/static/info.template.yaml` 的 `branding.name`，默认名称由该字段定义。修改这个值即可统一首页、登录页、侧栏、浏览器标题、含品牌名的聊天欢迎语，以及桌面原生菜单、窗口、离线引导页和应用包名称：
+
+```yaml
+branding:
+  name: "团队知识工作台"
+```
+
+默认组织名与版权使用 `{{PRODUCT_NAME}}` 引用这个值。组织名称和版权也可以填写独立文本；固定文本保留自己的值。已有本地配置如需跟随产品名，将相应名称改成 `{{PRODUCT_NAME}}`。
+
+设置 `YUXI_BRAND_FILE_PATH` 时，API 与桌面构建选中该文件；未设置时选中默认本地文件 `backend/package/yuxi/config/static/info.local.yaml`。选中的文件不存在时直接使用模板，不合并 YAML。桌面构建的相对配置路径以 `backend/` 为基准，与 API 在该目录运行时一致。若本地文件已存在，直接修改它的 `branding.name`，模板中的同名字段不会覆盖本地配置。桌面构建只读取当前 shell 的环境变量，不自动加载 `.env`；使用自定义路径时，将该变量显式传给构建命令。
+
+Web 页面刷新后从 `/api/system/info` 读取名称，无需重建前端。桌面中的业务页面同样读取当前实例配置；桌面原生菜单、离线页面与应用包名称使用构建时配置，修改后需在 `packages/yuxi-desktop` 执行 `npm run dist` 并退出旧进程，打开新应用。连接其他品牌实例时，业务页与客户端外壳可以有不同名称。
+
+产品改名保留应用 ID、包名、协议、存储键和原有客户端数据目录，已有实例与登录数据继续使用原目录。GitHub 链接、开源项目署名、开发文档与 Agent 提示词中的项目介绍保持原有含义；图标和主题颜色有各自的配置入口。
 
 ## 配置站点信息
 
@@ -17,7 +34,7 @@ cp -n backend/package/yuxi/config/static/info.template.yaml \
 
 ```yaml
 organization:
-  name: "Example Organization"
+  name: "{{PRODUCT_NAME}}"
   logo: "/logo.svg"
   avatar: "/avatar.jpg"
   login_bg: "/login-bg.jpg"
@@ -28,7 +45,7 @@ branding:
   subtitle: "知识库与智能体工作台"
 
 footer:
-  copyright: "© Example Organization"
+  copyright: "© {{PRODUCT_NAME}}"
   user_agreement_url: "/protocols/user-agreement.html"
   privacy_policy_url: "/protocols/privacy-policy.html"
 ```
@@ -39,15 +56,11 @@ footer:
 YUXI_BRAND_FILE_PATH=package/yuxi/config/static/info.local.yaml
 ```
 
-也可以在 `.env` 中设置绝对路径，但文件必须挂载到 API 容器中。路径不存在时，API 会回退到 `info.template.yaml`；它不会把两个 YAML 文件合并。
+也可以在 `.env` 中设置绝对路径，但文件必须挂载到 API 容器中。路径不存在时，API 会回退到 `info.template.yaml`；它不会把两个 YAML 文件合并。YAML 解析失败或 `branding.name` 不是非空字符串时，信息接口返回错误，桌面构建失败。桌面构建在宿主机运行时，绝对路径必须指向宿主机可读文件。
 
 ### 2. 重新加载
 
-开发环境的 API 直接挂载 `backend/package`，修改 YAML 后重启 API 即可：
-
-```bash
-docker compose restart api
-```
+开发环境的 API 直接挂载 `backend/package`，信息接口每次请求都读取 YAML。修改后刷新页面即可；修改 `YUXI_BRAND_FILE_PATH` 环境变量后需要重新创建 API 容器。
 
 生产 Compose 不挂载仓库源码，品牌 YAML 会在构建 API 镜像时复制进去。修改 `backend/package/yuxi/config/static/info.local.yaml` 后，需要重新构建并创建 API/worker 容器：
 

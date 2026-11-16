@@ -59,9 +59,9 @@ test('只为需要嵌入模型的类型构建模型和分块参数', () => {
   assert.equal('chunk_preset_id' in connectorRequest.additional_params, false)
 })
 
-test('知识库类型标签映射将 milvus 解析为 Yuxi', () => {
-  assert.equal(getKbTypeLabel('milvus'), 'Yuxi')
-  assert.equal(getKbTypeLabel('Milvus'), 'Yuxi')
+test('知识库类型标签使用与产品名称独立的内置知识库', () => {
+  assert.equal(getKbTypeLabel('milvus'), '内置知识库')
+  assert.equal(getKbTypeLabel('Milvus'), '内置知识库')
   assert.equal(getKbTypeLabel('dify'), 'Dify')
   assert.equal(getKbTypeLabel('notion'), 'Notion')
   assert.equal(getKbTypeLabel('unknown'), 'unknown')

@@ -10,6 +10,7 @@ const { _electron: electron } = require('playwright-core');
 
 const packageDir = path.resolve(__dirname, '../..');
 const webVersion = require('../../../../web/package.json').version;
+const { productName } = require('../../renderer/desktop-build.json');
 
 /** 确定性 HTTP 对端只拥有桌面传输测试数据，不冒充真实 worker 证据。 */
 async function serve(name) {
@@ -27,6 +28,7 @@ async function serve(name) {
     const json = (value) => { response.setHeader('content-type', 'application/json'); response.end(JSON.stringify(value)); };
     if (url.pathname === '/api/system/ready') return json({ status: available ? 'ready' : 'not_ready', version: webVersion });
     if (url.pathname === '/api/system/health') return json({ status: 'ok', version: webVersion });
+    if (url.pathname === '/api/system/info') return json({ success: true, data: { branding: { name: '团队知识工作台' } } });
     if (url.pathname === '/api/auth/check-first-run') return json({ first_run: false });
     if (url.pathname === '/api/auth/oidc/config') return json({ enabled: true, provider_name: '测试身份登录' });
     if (url.pathname === '/api/auth/oidc/login-url') return json({ login_url: `http://127.0.0.1:${server.address().port}/identity` });
@@ -102,6 +104,8 @@ test('真实 Electron：实例隔离、PDF 模块、流式代理、文件、外�
 
   await t.test('打包 Web 登录页面通过本地协议提交凭据并保存会话', async () => {
     await page.goto('app://yuxi/login');
+    await page.locator('.brand-main').filter({ hasText: '团队知识工作台' }).waitFor();
+    assert.equal(await page.title(), '团队知识工作台');
     await page.getByPlaceholder('UID或手机号').fill('desktop-test');
     await page.locator('input[type=password]').fill('synthetic-password');
     await page.getByRole('button', { name: '登录', exact: true }).click();
@@ -216,7 +220,7 @@ test('真实 Electron：实例隔离、PDF 模块、流式代理、文件、外�
     const screenshots = process.env.YUXI_DESKTOP_ARTIFACT_DIR || path.join(directory, 'screenshots');
     fs.mkdirSync(screenshots, { recursive: true });
     await app.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows().find((win) => win.getTitle() === 'Yuxi 实例设置').setSize(520, 650);
+      BrowserWindow.getAllWindows().find((win) => win.webContents.getURL().includes('/__desktop/settings')).setSize(520, 650);
     });
     await settings.waitForFunction(() => window.innerWidth <= 520);
     assert.equal(await settings.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
@@ -287,7 +291,7 @@ test('真实 Electron：实例隔离、PDF 模块、流式代理、文件、外�
     await settings.locator('li').filter({ hasText: '实例 B' }).getByRole('button', { name: '删除' }).click();
     await settings.getByRole('dialog').getByRole('button', { name: '删除实例' }).click();
     page = await onboarding;
-    await page.getByRole('heading', { name: '欢迎使用 Yuxi' }).waitFor();
+    await page.getByRole('heading', { name: `欢迎使用 ${productName}` }).waitFor();
     assert.equal(await page.getByRole('button', { name: '重新连接' }).isVisible(), false);
     assert.deepEqual(JSON.parse(fs.readFileSync(stateFile)), { instances: [], currentId: null });
   });

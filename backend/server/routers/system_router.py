@@ -1,14 +1,11 @@
-import os
-from pathlib import Path
-
 import aiofiles
-import yaml
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from yuxi import get_version
 from yuxi.config.options import invalidate_option_cache, system_options, update_option_value
+from yuxi.services.branding_service import load_info_config
 from yuxi.services.readiness_service import get_readiness
 from yuxi.storage.postgres.models_business import User
 from yuxi.utils.logging_config import LOG_FILE, logger
@@ -183,36 +180,6 @@ async def get_system_logs(levels: str | None = None, current_user: User = Depend
 # =============================================================================
 # === 信息管理分组 ===
 # =============================================================================
-
-
-async def load_info_config():
-    """加载信息配置文件"""
-    try:
-        # 配置文件路径
-        brand_file_path = os.environ.get("YUXI_BRAND_FILE_PATH", "package/yuxi/config/static/info.local.yaml")
-        config_path = Path(brand_file_path)
-
-        # 检查文件是否存在
-        if not config_path.exists():
-            logger.debug(f"The config file {config_path} does not exist, using default config")
-            config_path = Path("package/yuxi/config/static/info.template.yaml")
-
-        # 异步读取配置文件
-        async with aiofiles.open(config_path, encoding="utf-8") as file:
-            content = await file.read()
-
-        # 注入版本号占位符
-        content = content.replace("{{YUXI_VERSION}}", get_version())
-
-        config = yaml.safe_load(content)
-
-        return config
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to load info config: {e}")
-        return {}
 
 
 @system.get("/info")

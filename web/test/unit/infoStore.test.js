@@ -23,6 +23,7 @@ test('调试模式读取受限 LocalStorage 时降级为关闭', async () => {
   try {
     const { useInfoStore } = await server.ssrLoadModule('/src/stores/info.js')
     const store = useInfoStore()
+    assert.equal(store.productName, '知识工作台')
 
     assert.equal(store.debugMode, false)
   } finally {
@@ -49,6 +50,7 @@ test('品牌配置合并并发读取，成功缓存，失败与强制刷新可�
     assert.deepEqual(await first, { branding: { name: 'Test' } })
     assert.deepEqual(await second, { branding: { name: 'Test' } })
     assert.equal(store.branding.name, 'Test')
+    assert.equal(store.productName, 'Test')
     await store.loadInfoConfig()
     assert.equal(pending.length, 1)
     const forced = store.loadInfoConfig(true)
@@ -60,6 +62,7 @@ test('品牌配置合并并发读取，成功缓存，失败与强制刷新可�
     pending[2]({ success: true, data: { branding: { name: 'New' } } })
     await retry
     assert.equal(store.branding.name, 'New')
+    assert.equal(store.productName, 'New')
     assert.equal(store.isLoading, false)
   } finally {
     await server.close()

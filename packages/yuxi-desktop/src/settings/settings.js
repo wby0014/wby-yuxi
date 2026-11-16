@@ -42,6 +42,8 @@ function resetForm() {
 /** 从主进程重新读取当前事实，不依赖本地乐观状态。 */
 async function render() {
   const state = await api.state();
+  document.title = `${state.build.productName} 实例设置`;
+  document.getElementById('intro').textContent = `添加本地或远程 ${state.build.productName} 服务。切换实例需要重新登录。`;
   const list = document.getElementById('list');
   list.replaceChildren();
   document.getElementById('empty').hidden = state.instances.length > 0;

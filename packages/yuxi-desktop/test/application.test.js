@@ -8,6 +8,7 @@ const { createInstancesRepo } = require('../src/main/instances');
 /** 构建实例变更的窗口、会话与持久化观察点。 */
 function fixture() {
   const desktop = new DesktopApplication({}, '/tmp/yuxi-desktop-test');
+  desktop.build = { productName: '测试工作台' };
   desktop.repo = createInstancesRepo({
     instances: [
       { id: 'a', name: 'A', url: 'https://a.example' },
@@ -132,6 +133,7 @@ test('运行中的单个代理请求失败返回 502 并保留当前页面', asy
     screen: { getAllDisplays: () => [{ workArea: { x: 0, y: 0, width: 1440, height: 900 } }] },
   }, directory);
   desktop.repo = fixture().desktop.repo;
+  desktop.build = { productName: '测试工作台' };
   desktop.checkConnection = async () => ({ ok: true });
   await desktop.ensureMainWindow();
   const response = await handleRequest(new Request('app://yuxi/api/example'));

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
-  <title>Yuxi 实例设置</title>
+  <title>实例设置</title>
   <link rel="stylesheet" href="/standalone/base.css" />
   <link rel="stylesheet" href="/standalone/base.dark.css" />
   <link rel="stylesheet" href="/__desktop/style.css" />
@@ -13,14 +13,14 @@
 <body>
   <main>
     <h1>实例设置</h1>
-    <p class="muted">添加本地或远程 Yuxi 服务。切换实例需要重新登录。</p>
+    <p class="muted" id="intro">添加本地或远程服务。切换实例需要重新登录。</p>
     <section aria-labelledby="form-title">
       <h2 id="form-title">添加实例</h2>
       <form id="instance-form">
         <label for="name">实例名称</label>
         <input id="name" name="name" placeholder="例如：团队知识库" required maxlength="100" />
         <label for="url">服务地址</label>
-        <input id="url" name="url" placeholder="https://yuxi.example.com" required autocomplete="url" />
+        <input id="url" name="url" placeholder="https://app.example.com" required autocomplete="url" />
         <p class="muted">填写域名与可选端口，不含路径、账号或密码。</p>
         <div class="actions">
           <button id="save" type="submit" class="primary">添加实例</button>

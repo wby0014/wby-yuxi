@@ -22,13 +22,16 @@ class DesktopApplication {
     this.mainWindow = null;
     this.settingsWindow = null;
     this.changes = Promise.resolve();
-    this.status = { message: '请先添加一个 Yuxi 实例' };
+    this.status = { message: '请先添加一个实例' };
   }
 
   /** 从持久配置装配原生入口与主窗口。 */
   async start() {
     this.repo = createInstancesRepo(loadInstancesFile(this.instancesFile));
     this.build = JSON.parse(fs.readFileSync(path.join(this.rendererDir, 'desktop-build.json'), 'utf8'));
+    // 在设置展示名之前固定既有目录，改名不迁移实例和会话。
+    this.electron.app.setPath('userData', this.userData);
+    this.electron.app.setName(this.build.productName);
     this.electron.session.fromPartition('yuxi-settings').protocol.handle('app', createProtocolHandler({
       rendererDir: this.rendererDir, instance: null,
     }));
@@ -163,7 +166,7 @@ class DesktopApplication {
 
   /** 检查接流量条件，失败时显示可重试的本地页面。 */
   async showMainContent(win, instance, signal) {
-    const result = instance ? await this.checkConnection(instance.url, signal) : { ok: false, message: '请先添加一个 Yuxi 实例' };
+    const result = instance ? await this.checkConnection(instance.url, signal) : { ok: false, message: '请先添加一个实例' };
     if (win.isDestroyed() || signal.aborted) return;
     this.status = result;
     await win.loadURL(result.ok ? 'app://yuxi/' : 'app://yuxi/__desktop/status');
@@ -196,7 +199,7 @@ class DesktopApplication {
       return;
     }
     const win = new this.electron.BrowserWindow({
-      width: 680, height: 650, minWidth: 520, minHeight: 480, title: 'Yuxi 实例设置',
+      width: 680, height: 650, minWidth: 520, minHeight: 480, title: `${this.build.productName} 实例设置`,
       webPreferences: {
         partition: 'yuxi-settings', preload: path.join(__dirname, '../preload/settings.js'),
         contextIsolation: true, sandbox: true, nodeIntegration: false,
@@ -213,7 +216,7 @@ class DesktopApplication {
   openExternal(url) { return this.electron.shell.openExternal(externalUrl(url)); }
 
   /** 原生标题显示当前实例，避免跨环境误操作。 */
-  windowTitle() { return `Yuxi Desktop${this.repo.current() ? ` · ${this.repo.current().name}` : ''}`; }
+  windowTitle() { return `${this.build.productName}${this.repo.current() ? ` · ${this.repo.current().name}` : ''}`; }
 
   /** 重新生成实例菜单与主窗口入口。 */
   refreshMenus() {
@@ -273,6 +276,7 @@ class DesktopApplication {
       this.authorizing = true;
       try {
         return await authorizeOIDC({ BrowserWindow, parent: this.mainWindow, instance: this.boundInstance,
+          productName: this.build.productName,
           fetch: (url, init) => this.instanceSession(this.boundInstance).fetch(url, init), signal: this.mainController.signal });
       } finally { this.authorizing = false; }
     });

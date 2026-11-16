@@ -2,6 +2,8 @@
 
 const { execFileSync, spawnSync } = require('node:child_process');
 const path = require('node:path');
+const { sanitizeFileName } = require('builder-util/out/filename');
+const { readProductName } = require('./brand-config');
 
 /** 发布前拒绝缺失的签名与公证条件，不输出凭据。 */
 function validateReleaseEnvironment(env, platform) {
@@ -27,7 +29,7 @@ function release() {
   const output = `dist/release-${process.arch}`;
   run(process.execPath, ['node_modules/electron-builder/out/cli/cli.js', '--config', 'electron-builder.release.cjs',
     `--${process.arch}`, `--config.directories.output=${output}`, '--publish', 'never']);
-  const app = path.join(cwd, output, process.arch === 'x64' ? 'mac' : `mac-${process.arch}`, 'Yuxi Desktop.app');
+  const app = path.join(cwd, output, process.arch === 'x64' ? 'mac' : `mac-${process.arch}`, `${sanitizeFileName(readProductName())}.app`);
   run('codesign', ['--verify', '--deep', '--strict', app]);
   const signature = spawnSync('codesign', ['-dv', '--verbose=2', app], { cwd, encoding: 'utf8' });
   if (signature.error || signature.status !== 0) throw new Error('无法读取产物签名');
