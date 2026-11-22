@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'packages/yuxi-desktop/**'
+      - 'packages/yuxi-desktop-tauri/**'
+      - 'scripts/desktop/**'
       - 'web/**'
       - 'backend/package/yuxi/config/static/**'
       - '.github/workflows/desktop.yml'
@@ -12,6 +14,8 @@ on:
     branches: [main]
     paths:
       - 'packages/yuxi-desktop/**'
+      - 'packages/yuxi-desktop-tauri/**'
+      - 'scripts/desktop/**'
       - 'web/**'
       - 'backend/package/yuxi/config/static/**'
       - '.github/workflows/desktop.yml'
@@ -55,4 +59,40 @@ jobs:
         with:
           name: desktop-screenshots
           path: ${{ runner.temp }}/desktop-screenshots
+          if-no-files-found: ignore
+
+  tauri:
+    name: macOS Tauri native tests and unsigned package
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      # 首次联网解析的锁文件上传供审阅；本机离线环境不能生成可信依赖锁。
+      - run: npm install
+        working-directory: packages/yuxi-desktop-tauri
+      - run: npm test
+        working-directory: packages/yuxi-desktop-tauri
+      - run: npm run build:renderer
+        working-directory: packages/yuxi-desktop-tauri
+      - run: npm run test:native
+        working-directory: packages/yuxi-desktop-tauri
+      - name: Assemble unsigned Tauri app without publishing
+        run: npx --no-install tauri build --config src-tauri/tauri.generated.json --bundles app --no-sign
+        working-directory: packages/yuxi-desktop-tauri
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: tauri-resolved-locks
+          path: |
+            packages/yuxi-desktop-tauri/package-lock.json
+            packages/yuxi-desktop-tauri/src-tauri/Cargo.lock
           if-no-files-found: ignore

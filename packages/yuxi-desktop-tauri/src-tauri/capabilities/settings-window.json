@@ -1,0 +1,8 @@
+{
+  "identifier": "settings-window",
+  "description": "独立本地设置窗口可管理实例配置并订阅配置变更。",
+  "windows": ["settings"],
+  "remote": { "urls": ["yuxi://localhost/__desktop/settings"] },
+  "local": true,
+  "permissions": ["allow-desktop-settings", "core:event:allow-listen", "core:event:allow-unlisten"]
+}

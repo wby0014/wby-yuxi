@@ -1,5 +1,6 @@
 import { apiGet, apiPost, apiDelete, apiPut, apiRequest } from './base'
 import { useUserStore } from '@/stores/user'
+import { platformFetch } from '../platform/index.js'
 
 /**
  * 智能体API模块
@@ -173,8 +174,8 @@ export const agentApi = {
    */
   streamRequestEvents: (requestId, options = {}) => {
     const { signal } = options
-    const headers = { ...useUserStore().getAuthHeaders() }
-    return fetch(`/api/agent/requests/${requestId}/events`, {
+    const headers = { ...useUserStore().getAuthHeaders(), Accept: 'text/event-stream' }
+    return platformFetch(`/api/agent/requests/${requestId}/events`, {
       method: 'GET',
       headers,
       signal
@@ -219,14 +220,15 @@ export const agentApi = {
   streamAgentRunEvents: (runId, afterSeq = '0-0', options = {}) => {
     const { signal, verbose = false } = options
     const headers = {
-      ...useUserStore().getAuthHeaders()
+      ...useUserStore().getAuthHeaders(),
+      Accept: 'text/event-stream'
     }
     const cursor = String(afterSeq || '0-0')
     if (cursor && cursor !== '0-0') {
       headers['Last-Event-ID'] = cursor
     }
     const params = new URLSearchParams({ verbose: String(verbose) })
-    return fetch(`/api/agent/runs/${runId}/events?${params.toString()}`, {
+    return platformFetch(`/api/agent/runs/${runId}/events?${params.toString()}`, {
       method: 'GET',
       headers,
       signal

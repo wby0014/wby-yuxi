@@ -1,6 +1,6 @@
-'use strict';
+import { getDesktop } from '/__desktop/platform/index.js';
 
-const api = window.yuxiDesktop;
+const api = getDesktop();
 const message = document.getElementById('message');
 const retry = document.getElementById('retry');
 

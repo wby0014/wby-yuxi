@@ -23,12 +23,8 @@ function createProtocolHandler({ rendererDir, instance, fetch, signal }) {
     if (!isAppUrl(request.url)) return new Response('Forbidden', { status: 403 });
     const url = new URL(request.url);
     const localFiles = {
-      '/__desktop/status': path.join(__dirname, '../status/index.html'),
-      '/__desktop/status.js': path.join(__dirname, '../status/status.js'),
-      '/__desktop/style.css': path.join(__dirname, '../settings/style.css'),
-      '/__desktop/settings': path.join(__dirname, '../settings/index.html'),
-      '/__desktop/settings.js': path.join(__dirname, '../settings/settings.js'),
-      '/__desktop/theme.js': path.join(__dirname, '../settings/theme.js'),
+      '/__desktop/status': path.join(rendererDir, '__desktop/status.html'),
+      '/__desktop/settings': path.join(rendererDir, '__desktop/settings.html'),
     };
     const decision = localFiles[url.pathname]
       ? { action: 'file', filePath: localFiles[url.pathname] }

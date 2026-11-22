@@ -1,0 +1,29 @@
+[package]
+name = "yuxi-desktop-tauri"
+version = "0.1.0"
+description = "Yuxi Tauri desktop client"
+edition = "2021"
+rust-version = "1.90"
+
+[lib]
+name = "yuxi_desktop_tauri"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+tauri = { version = "2.12", features = [] }
+tauri-plugin-single-instance = "2.5"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json", "cookies"] }
+tokio = { version = "1", features = ["sync", "time", "macros", "net", "io-util", "rt-multi-thread"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

@@ -4,6 +4,8 @@
 
 Yuxi 的 macOS 桌面客户端。Electron 加载本地打包的 Vue 页面，通过 `app://yuxi` 提供静态资源，并将 `/api/*`、`/minio/public/*` 转发到选中的 Yuxi 服务。业务状态、权限、知识库和智能体执行由服务端拥有；客户端运行需要已部署的 Yuxi 实例。
 
+[Tauri 客户端](../yuxi-desktop-tauri/README.md)位于独立模块。两者共用 `web/src` 业务、`web/desktop` 设置与状态页，以及 `scripts/desktop` 构建辅助；Electron 保留自己的主进程、preload、应用 ID、数据和发布流程。
+
 ## 开发运行
 
 需要 macOS、Node.js 22 和 pnpm。以下命令从仓库根目录开始：
@@ -16,7 +18,7 @@ npm ci
 npm start
 ```
 
-`start`、`dist` 和 `dist:release` 都先从当前 Web 源码构建，再复制界面、主题和版本元数据到被 Git 忽略的 `renderer/`。首次启动显示本地引导和实例设置。实例地址只接受 HTTP(S) origin，例如 `http://localhost:5050` 或 `https://yuxi.example.com`，不含路径、凭据、查询或片段。
+`start`、`dist` 和 `dist:release` 都先从当前 Web 源码直接构建到本模块被 Git 忽略的 `renderer/`，并复制共享设置页、主题和版本元数据。两种宿主不共享可写构建产物。首次启动显示本地引导和实例设置。实例地址只接受 HTTP(S) origin，例如 `http://localhost:5050` 或 `https://yuxi.example.com`，不含路径、凭据、查询或片段。
 
 客户端通过 `/api/system/ready` 检查连接，要求服务端版本与打包 Web 版本相同。连接失败、未就绪或版本不匹配时，本地状态页提供重新连接和实例设置入口。桌面版本与界面版本显示在设置和状态页中。
 

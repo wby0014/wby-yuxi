@@ -1,4 +1,5 @@
 import { useUserStore, checkAdminPermission, checkSuperAdminPermission } from '@/stores/user'
+import { platformFetch } from '../platform/index.js'
 import { message } from 'ant-design-vue'
 
 function safeRequestMetadata(url, requestOptions, response = null) {
@@ -143,7 +144,7 @@ export async function apiRequest(url, options = {}, requiresAuth = true, respons
     }
 
     // 发送请求
-    const response = await fetch(url, requestOptions)
+    const response = await platformFetch(url, requestOptions)
 
     // 处理API返回的错误
     if (!response.ok) {

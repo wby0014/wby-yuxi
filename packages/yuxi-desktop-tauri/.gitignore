@@ -1,0 +1,6 @@
+/renderer/
+/src-tauri/target/
+/src-tauri/gen/
+/src-tauri/tauri.generated.json
+!src-tauri/Cargo.lock
+!package-lock.json

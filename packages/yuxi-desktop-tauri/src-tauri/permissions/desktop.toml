@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-stream"
+description = "发起、增量读取和取消固定实例的业务请求。"
+commands.allow = ["stream_open", "stream_read", "stream_cancel"]

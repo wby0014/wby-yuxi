@@ -1,0 +1,8 @@
+{
+  "identifier": "main-window",
+  "description": "主窗口可查询桌面状态、授权和访问当前实例业务接口。",
+  "windows": ["main-*"],
+  "remote": { "urls": ["yuxi://localhost/*"] },
+  "local": true,
+  "permissions": ["allow-desktop-main", "allow-stream"]
+}

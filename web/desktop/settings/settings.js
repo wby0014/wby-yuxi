@@ -1,6 +1,6 @@
-'use strict';
+import { getDesktopSettings } from '/__desktop/platform/index.js';
 
-const api = window.settingsAPI;
+const api = getDesktopSettings();
 const form = document.getElementById('instance-form');
 const nameInput = document.getElementById('name');
 const urlInput = document.getElementById('url');

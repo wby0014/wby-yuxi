@@ -122,6 +122,19 @@ npx --no-install electron-builder --dir --publish never
 
 桌面 Electron 测试使用真实运行时和确定性 HTTP 对端，回读 DOM、实例会话、流与下载文件。它证明桌面协议、登录适配和隔离边界；真实 API、worker、外部身份服务与跨机器安装分别需要对应环境验证。安装、实例连接和正式签名命令见[桌面说明](https://github.com/xerrors/Yuxi/blob/main/packages/yuxi-desktop/README.md)。
 
+Tauri 模块与 Electron 使用同一 Web 源码，在 macOS 安装 Rust 和模块依赖后执行：
+
+```bash
+cd packages/yuxi-desktop-tauri
+npm test
+npm run build:renderer
+npm run test:native
+npm run check:native
+npm run dist -- --bundles app --no-sign
+```
+
+JS 单测验证跨宿主接口、multipart、Response 增量读取与取消；Rust 单测验证配置回读、固定实例 HTTP、Cookie 隔离和本地页面边界。原生单测和打包都不能替代真实 WebView 的登录、实例切换、PDF/HTML、文件落盘和 OIDC 验证。当前原生验收及锁文件状态见 [Tauri 说明](https://github.com/xerrors/Yuxi/blob/main/packages/yuxi-desktop-tauri/README.md)。
+
 CLI：
 
 ```bash

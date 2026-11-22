@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src ipc: http://ipc.localhost https://ipc.localhost; object-src 'none'; base-uri 'none'" />
   <title>连接实例</title>
   <link rel="stylesheet" href="/standalone/base.css" />
   <link rel="stylesheet" href="/standalone/base.dark.css" />
@@ -21,6 +21,6 @@
     </div>
     <p id="version" class="muted"></p>
   </main>
-  <script src="/__desktop/status.js"></script>
+  <script type="module" src="/__desktop/status.js"></script>
 </body>
 </html>

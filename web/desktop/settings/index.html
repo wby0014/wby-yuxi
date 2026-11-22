@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src ipc: http://ipc.localhost https://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>实例设置</title>
   <link rel="stylesheet" href="/standalone/base.css" />
   <link rel="stylesheet" href="/standalone/base.dark.css" />
@@ -47,6 +47,6 @@
       <button id="confirm-delete" class="danger">删除实例</button>
     </div>
   </dialog>
-  <script src="/__desktop/settings.js"></script>
+  <script type="module" src="/__desktop/settings.js"></script>
 </body>
 </html>

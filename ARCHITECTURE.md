@@ -80,7 +80,9 @@ Yuxi 只交付完整知识能力路径。API 始终注册 `external_kb`、`knowl
 
 `packages/yuxi-desktop` 使用 Electron 加载本地构建的 Web，通过 `app://yuxi` 提供静态资源，并流式转发 API 与公开对象请求到固定实例。主进程拥有实例配置、窗口、会话和原生入口；每个实例使用独立 Session，实例切换串行关闭旧窗口、取消请求和清理登录态，再发布新目标。preload 只暴露受限桥接，IPC 在副作用前检查窗口与顶层 frame，OIDC 授权由无 preload 的独立窗口完成。
 
-桌面沿用服务端权限、持久化与 worker 链路，启动前检查 readiness 和打包界面版本。开发、测试与签名发布入口见[桌面说明](packages/yuxi-desktop/README.md)。
+`packages/yuxi-desktop-tauri` 是独立的 Tauri/Rust 实现，原生构建与宿主行为仍处于验证阶段。Rust 拥有实例文件、窗口、授权和固定实例传输；业务请求通过 open/read/cancel 命令增量读取，静态资源由 `yuxi://localhost` 提供。每个主窗口使用独立非持久 WebView 与 Cookie jar，重建窗口需要重新登录。两种宿主共用 `web/src/platform` 接口、`web/desktop` 设置与状态界面、`scripts/desktop` 构建辅助，应用身份、数据与输出目录独立。
+
+桌面沿用服务端权限、持久化与 worker 链路，启动前检查 readiness 和打包界面版本。运行与验证边界分别见 [Electron 说明](packages/yuxi-desktop/README.md)和 [Tauri 说明](packages/yuxi-desktop-tauri/README.md)。
 
 ## 智能体运行链路
 

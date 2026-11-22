@@ -1,9 +1,12 @@
+import { getDesktop } from '../platform/index.js'
+
 const AUTO_START_KEY = 'oidc_auto_start_attempted'
 
 /** 桌面通过隔离授权窗获取一次性码，浏览器沿既有站点跳转。 */
 export async function startOIDCLogin(getOIDCLoginUrl) {
-  if (window.yuxiDesktop?.authorizeOIDC) {
-    const { code } = await window.yuxiDesktop.authorizeOIDC()
+  const desktop = getDesktop()
+  if (desktop) {
+    const { code } = await desktop.authorizeOIDC()
     if (!code) throw new Error('登录回调缺少授权码')
     window.location.href = `/auth/oidc/callback?${new URLSearchParams({ code })}`
     return

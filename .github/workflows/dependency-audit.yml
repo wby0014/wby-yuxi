@@ -12,6 +12,10 @@ on:
       - "packages/yuxi-cli/uv.lock"
       - "packages/yuxi-desktop/package.json"
       - "packages/yuxi-desktop/package-lock.json"
+      - "packages/yuxi-desktop-tauri/package.json"
+      - "packages/yuxi-desktop-tauri/package-lock.json"
+      - "packages/yuxi-desktop-tauri/src-tauri/Cargo.toml"
+      - "packages/yuxi-desktop-tauri/src-tauri/Cargo.lock"
       - "web/package.json"
       - "web/pnpm-lock.yaml"
       - "web/pnpm-workspace.yaml"
@@ -32,6 +36,10 @@ on:
       - "packages/yuxi-cli/uv.lock"
       - "packages/yuxi-desktop/package.json"
       - "packages/yuxi-desktop/package-lock.json"
+      - "packages/yuxi-desktop-tauri/package.json"
+      - "packages/yuxi-desktop-tauri/package-lock.json"
+      - "packages/yuxi-desktop-tauri/src-tauri/Cargo.toml"
+      - "packages/yuxi-desktop-tauri/src-tauri/Cargo.lock"
       - "web/package.json"
       - "web/pnpm-lock.yaml"
       - "web/pnpm-workspace.yaml"
@@ -61,6 +69,26 @@ jobs:
       # Electron 在 devDependencies 声明，但其二进制进入最终 App，必须纳入审计。
       - run: npm audit --audit-level=high
         working-directory: packages/yuxi-desktop
+
+  tauri:
+    name: Tauri CLI and Rust dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm install --package-lock-only --ignore-scripts
+        working-directory: packages/yuxi-desktop-tauri
+      - run: npm audit --audit-level=high
+        working-directory: packages/yuxi-desktop-tauri
+      - run: cargo generate-lockfile
+        working-directory: packages/yuxi-desktop-tauri/src-tauri
+      - run: cargo install cargo-audit --locked
+      - run: cargo audit
+        working-directory: packages/yuxi-desktop-tauri/src-tauri
 
   python:
     name: Python vulnerabilities and licenses

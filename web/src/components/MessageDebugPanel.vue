@@ -422,6 +422,7 @@ import {
 } from '@lucide/vue'
 import { message } from 'ant-design-vue'
 import { agentApi } from '@/apis/agent_api'
+import { getDesktop } from '@/platform/index.js'
 import JsonTreeViewer from '@/components/common/JsonTreeViewer.vue'
 import { copyTextToClipboard } from '@/utils/clipboard'
 import {
@@ -1082,7 +1083,7 @@ const setLangfuseRunOpening = (runId, opening) => {
 const openRunInLangfuse = async (runId) => {
   if (!runId || isLangfuseRunOpening(runId)) return
 
-  const desktop = window.yuxiDesktop
+  const desktop = getDesktop()
   const targetWindow = desktop ? null : window.open('about:blank', '_blank')
   if (!desktop && !targetWindow) {
     message.warning('浏览器阻止了新标签页，请允许弹窗后重试')

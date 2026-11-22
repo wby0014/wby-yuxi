@@ -17,6 +17,7 @@ test('自定义构建名驱动原生菜单、窗口与离线页面，userData �
   fs.cpSync(path.join(packageDir, 'src'), path.join(fixture, 'src'), { recursive: true });
   fs.copyFileSync(path.join(packageDir, 'package.json'), path.join(fixture, 'package.json'));
   fs.symlinkSync(path.join(packageDir, 'renderer/standalone'), path.join(fixture, 'renderer/standalone'), 'dir');
+  fs.symlinkSync(path.join(packageDir, 'renderer/__desktop'), path.join(fixture, 'renderer/__desktop'), 'dir');
   const build = JSON.parse(fs.readFileSync(path.join(packageDir, 'renderer/desktop-build.json')));
   fs.writeFileSync(path.join(fixture, 'renderer/desktop-build.json'), JSON.stringify({ ...build, productName }));
   const app = await electron.launch({
